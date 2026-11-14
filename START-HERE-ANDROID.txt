@@ -1,0 +1,13 @@
+LIFEFARM 3.0 — ANDROID QUICK START
+
+1. Extract this ZIP in My Files.
+2. Open github.com and create a repository named lifefarm-platform.
+3. Upload the extracted folder contents, including the hidden .github folder.
+4. In GitHub repository Settings > Pages, choose GitHub Actions.
+5. Open Actions and wait for the deployment workflow to finish.
+6. Open the Pages link shown by GitHub.
+7. To publish an article, open editor.html, load content/articles.json, edit, download the new JSON, then replace content/articles.json in GitHub and commit.
+
+No database, OAuth, email provider, API key or environment variables are required.
+Do not upload passwords or private personal information to a public repository.
+See README.md and docs/ANDROID-GUIDE.md for full instructions.

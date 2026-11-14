@@ -1,0 +1,22 @@
+[
+  {
+    "id": "welcome-lifefarm",
+    "title": "Welcome to LIFEFARM",
+    "category": "Announcement",
+    "date": "2026-11-14",
+    "excerpt": "An introduction to LIFEFARM: knowledge, discovery, research, innovation and development.",
+    "body": "LIFEFARM is an initiative focused on knowledge, discovery, research, innovation, engineering and development. It aims to connect ideas with practical capability and constructive action.\n\nExplore the organization, its domains and ARENA. This website is an evolving public information space. New articles and resources will be added through the LIFEFARM Content Studio and GitHub publishing workflow.",
+    "cover": "",
+    "featured": true
+  },
+  {
+    "id": "arena-unified-system",
+    "title": "ARENA: A Unified System for Human Progress",
+    "category": "ARENA",
+    "date": "2026-11-14",
+    "excerpt": "ARENA organizes knowledge, opportunities, people and action across multiple domains.",
+    "body": "ARENA is an organization built around a connected structure for knowledge, discovery, action, opportunities and human progress.\n\nIts structure connects branches, divisions, programs, projects, missions, tasks, deliverables, evaluation and outcomes. Participants can learn, contribute, collaborate and take practical action within defined responsibilities.",
+    "cover": "",
+    "featured": true
+  }
+]

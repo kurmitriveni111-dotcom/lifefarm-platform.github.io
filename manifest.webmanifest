@@ -1,0 +1,17 @@
+{
+  "name": "LIFEFARM | ARENA",
+  "short_name": "LIFEFARM",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#09080e",
+  "theme_color": "#09080e",
+  "icons": [
+    {
+      "src": "./assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
