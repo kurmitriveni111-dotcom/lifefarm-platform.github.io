@@ -374,7 +374,7 @@ function setReferencePresence(hasReference) {
 function memberPanel() {
   const owner = V;
   return `<div class="lf-member-top"><div><div class="lf-kicker">SIGNED IN · MEMBER IDENTITY</div><h3>${h(owner.username)} <span class="rank">${h(owner.rank_tier || 'New Member')}</span></h3><p class="mu">Member Code: ${h(owner.member_code||'—')} · Public ID: ${h(owner.public_id)} · Joined ${h(dateText(owner.created_at))}</p></div><div class="lf-online">${h(String(owner.status||'active').toUpperCase())}</div></div><div id="lfIdentityResult"></div>
-    <div class="row"><button type="button" id="lfShowCard">MEMBER CARD</button><button type="button" class="o" id="lfOpenStorage">MY STORAGE</button><button type="button" class="o" id="lfPrivateProfile">PRIVATE PROFILE</button><button type="button" class="o" id="showrefs">REFERENCE CODE SLOTS</button><button type="button" class="o" id="showsettings">ACCOUNT SETTINGS</button>${owner.role==='admin'?'<button type="button" class="o" id="lfAdminRanks">ADMIN DIRECTORY & RANKS</button>':''}<button type="button" class="o" id="lfLogout">LOG OUT</button></div>
+    <div class="row"><button type="button" id="lfShowCard">MEMBER CARD</button><button type="button" class="o" id="lfOpenStorage">MY STORAGE</button><button type="button" class="o" id="lfPrivateProfile">PRIVATE PROFILE</button><button type="button" class="o" id="showrefs">REFERENCE CODE SLOTS</button><button type="button" id="lfOpenRefGenerator">GENERATE REFERENCE CODE</button><button type="button" class="o" id="showsettings">ACCOUNT SETTINGS</button>${owner.role==='admin'?'<button type="button" class="o" id="lfAdminRanks">ADMIN DIRECTORY & RANKS</button>':''}<button type="button" class="o" id="lfLogout">LOG OUT</button></div>
     <div id="lfMemberDetails"></div>`;
 }
 function showIssuedCredentials(profile) {
@@ -426,7 +426,7 @@ async function refreshReferences(hostOverride) {
   try {
     const {items=[]}=await lfApi('references');
     const order=[1,2,3];const map=new Map(items.map(x=>[Number(x.slot_position),x]));
-    host.innerHTML=`<div class="lf-panel"><div class="lf-kicker">REFERENCE CODE MEMORY · 3 RECENT SLOTS / 10,000 UNIQUE CODES</div><p class="mu">This browser keeps the three most recent codes for your account. Codes are allocated from the fixed LF-00001 to LF-10000 pool; issued codes are not randomly generated or reused. This list shows safe ending hints.</p>${order.map(slot=>{const x=map.get(slot);return `<div class="lf-ref-row"><div><b>SLOT ${slot} · ${slot===1?'NEWEST':slot===2?'SECOND NEWEST':'OLDEST'}</b><div class="lf-secret small">${x?'••••••'+h(x.code_hint):'— EMPTY —'}</div><small>${x?`Created ${h(dateText(x.created_at))} · ${h(x.status)}`:'No code in this slot yet'}</small></div></div>`;}).join('')}
+    host.innerHTML=`<div class="lf-panel"><div class="lf-kicker">REFERENCE CODE GENERATOR · AVAILABLE ANYTIME · 10,000-CODE POOL</div><p class="mu">This generator stays available whenever you are signed in; you do not need to generate a code only when creating your Member Key. This browser keeps the three most recent code records for your account. Codes are allocated from the fixed LF-00001 to LF-10000 pool; issued codes are not randomly generated or reused. This list shows safe ending hints.</p>${order.map(slot=>{const x=map.get(slot);return `<div class="lf-ref-row"><div><b>SLOT ${slot} · ${slot===1?'NEWEST':slot===2?'SECOND NEWEST':'OLDEST'}</b><div class="lf-secret small">${x?'••••••'+h(x.code_hint):'— EMPTY —'}</div><small>${x?`Created ${h(dateText(x.created_at))} · ${h(x.status)}`:'No code in this slot yet'}</small></div></div>`;}).join('')}
       <div class="row"><button type="button" id="lfNewReference">GENERATE NEW REFERENCE CODE</button><button type="button" class="o" id="lfRevokeReferences">REVOKE ALL CODES</button></div><div id="lfRefGenerateArea" hidden><form id="lfRefGenerateForm"><label class="f">USERNAME</label><input name="username" maxlength="80" autocomplete="username" required value="${h(V.username)}" placeholder="Enter your username"><label class="f">MEMBER CODE</label><input name="memberCode" maxlength="80" autocomplete="off" required value="${h(V.member_code)}" placeholder="Enter your Member Code"><label class="f">MEMBER KEY</label><input name="memberKey" type="password" maxlength="100" autocomplete="off" spellcheck="false" required placeholder="Enter your Member Key"><button type="submit">VERIFY DETAILS & GENERATE REFERENCE CODE</button></form></div><div id="lfRefMessage" class="msg"></div></div>`;
     
     $id('lfNewReference').onclick=()=>{$id('lfRefGenerateArea').hidden=!$id('lfRefGenerateArea').hidden;};
@@ -507,7 +507,8 @@ async function renderIdentity() {
   const host=$id('idb');if(!host)return;
   host.innerHTML=V?memberPanel():identityForms();
   if(V){
-    $id('showrefs').onclick=refreshReferences;$id('showsettings').onclick=showAccountSettings;$id('lfShowCard').onclick=showMemberCard;$id('lfOpenStorage').onclick=()=>{document.getElementById('storage')?.scrollIntoView({behavior:'smooth'});loadStorage();};$id('lfPrivateProfile').onclick=showPrivateProfile;if(ownerIsAdmin())$id('lfAdminRanks').onclick=showAdminRanks;
+    $id('showrefs').onclick=refreshReferences;$id('lfOpenRefGenerator').onclick=async()=>{await refreshReferences();const area=$id('lfRefGenerateArea');if(area){area.hidden=false;area.scrollIntoView({behavior:'smooth',block:'nearest'});}};$id('showsettings').onclick=showAccountSettings;$id('lfShowCard').onclick=showMemberCard;$id('lfOpenStorage').onclick=()=>{document.getElementById('storage')?.scrollIntoView({behavior:'smooth'});loadStorage();};$id('lfPrivateProfile').onclick=showPrivateProfile;if(ownerIsAdmin())$id('lfAdminRanks').onclick=showAdminRanks;
+    await refreshReferences($id('lfMemberDetails'));
     $id('lfLogout').onclick=async()=>{try{await lfApi('logout');}catch(e){alert(e.message);return;}setSession('');V=null;lastIssuedKey='';lastIssuedReference='';await renderIdentity();await loadStorage();};
     return;
   }
@@ -624,7 +625,7 @@ async function loadStorage() {
 window.bootIdentity=bootIdentity;window.lg=lg;window.lb=async()=>{};window.toTab=toTab;window.revokeAll=revokeAll;
 
 // Never leave the Identity Core on an endless Loading screen.
-window.addEventListener('error', function(ev) { const host=document.getElementById('idb'); if(host && host.textContent.includes('Loading')) host.innerHTML='<div class="lf-panel lf-identity-error"><b>IDENTITY CORE COULD NOT START</b><p>'+String(ev.message || 'A script failed to load.')+'</p><p>Refresh the page. If this continues, check that the complete LIFEFARM website files were uploaded.</p></div>'; });
+window.addEventListener('error', function(ev) { const host=document.getElementById('idb'); if(host && (host.textContent.includes('Loading') || !host.querySelector('form,button'))) host.innerHTML='<div class="lf-panel lf-identity-error"><b>IDENTITY CORE ERROR</b><p>'+String(ev.message || 'A script failed to load.')+'</p><p>Refresh the page and open the complete HTML file in Chrome or Edge. If it continues, check the browser console.</p></div>'; });
 window.addEventListener('unhandledrejection', function(ev) { const host=document.getElementById('idb'); if(host && host.textContent.includes('Loading')) host.innerHTML='<div class="lf-panel lf-identity-error"><b>IDENTITY CORE STARTUP ERROR</b><p>'+String(ev.reason?.message || ev.reason || 'The identity service could not start.')+'</p><p>Check the website configuration and refresh.</p></div>'; });
 
 </script>
@@ -679,7 +680,13 @@ async function lb(){
  $('lb').innerHTML=d?Object.entries(GM).map(([k,g])=>row(g.n,'Best '+(d.b[k]||0))).join(''):'<p class="mu">No scores in this visit yet. Game scores are not written to the Identity Core database.</p>';
 }
 $('lb').innerHTML='<p class="mu">Scores remain in this browser visit only. Sign-in identity records are kept separately.</p>';
-bootIdentity();
+// Reliable startup with visible diagnostics instead of silently leaving buttons inactive.
+Promise.resolve().then(()=>bootIdentity()).catch(err=>{
+  console.error('LIFEFARM Identity Core startup failed:', err);
+  const host=document.getElementById('idb');
+  if(host) host.innerHTML='<div class=\"lf-panel lf-identity-error\"><b>IDENTITY CORE COULD NOT START</b><p></p><p>Open this complete HTML file in an up-to-date browser (Chrome or Edge). If the message remains, check the browser console.</p></div>';
+  const box=host?.querySelector('p'); if(box) box.textContent=String(err?.message||err||'Unknown startup error');
+});
 
 </script>
 <script>
@@ -720,4 +727,3 @@ $('help').innerHTML='<h2>HELP CENTRE</h2><div class="box"><details><summary>How 
 // Keep the FORMA X export available as a quiet, collapsed integration utility instead of a floating overlay.
 (()=>{const host=document.getElementById('help');if(!host)return;const panel=document.createElement('details');panel.className='box';panel.style.cssText='margin-top:14px';panel.innerHTML='<summary style="cursor:pointer;font-weight:600">Website integration tools</summary><p class="mu" style="margin:8px 0">Optional utility for connecting this local LIFEFARM registry to FORMA X. Keep exported files private.</p><button type="button" id="lfExportFormaBundle" class="o" style="margin-top:4px;padding:9px 12px;font-size:13px">Export FORMA X access bundle</button>';host.appendChild(panel);document.getElementById('lfExportFormaBundle').onclick=()=>{try{const members=JSON.parse(localStorage.getItem('LIFEFARM_LOCAL_MEMBERS_V1')||'[]');const registry=JSON.parse(localStorage.getItem('LIFEFARM_REFERENCE_REGISTRY_10000_V2')||'{"used":{}}');if(!Array.isArray(members)||!registry?.used)throw Error('Register or sign in first.');const pool=Array.from({length:10000},(_,i)=>'LF-'+String(i+1).padStart(5,'0'));const bundle={format:'LIFEFARM_FORMA_ACCESS_BUNDLE_V2',exportedAt:new Date().toISOString(),referencePool:pool,registry,members};const blob=new Blob([JSON.stringify(bundle)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='LIFEFARM_FORMA_X_Access_Bundle.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);alert('Access bundle exported. Import this JSON file in FORMA X. It contains local account and reference-code data; keep it private.');}catch(e){alert(e.message||'Could not export access bundle.')}}})();
 </script></body></html>
-
